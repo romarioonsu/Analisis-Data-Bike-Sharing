@@ -1,0 +1,6 @@
+matplotlib==3.7.1
+numpy==1.25.2
+pandas==2.0.3
+seaborn==0.13.1
+google-colab==1.0.0
+streamlit==1.28.2
