@@ -4,4 +4,4 @@ pandas
 seaborn
 google-colab
 streamlit
-pip==24.0
+pip
