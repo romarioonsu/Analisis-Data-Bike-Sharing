@@ -1,7 +1,6 @@
-matplotlib==3.9.0
+matplotlib
 numpy
 pandas
 seaborn
-google-colab
 streamlit
 
