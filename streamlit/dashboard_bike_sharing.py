@@ -1,45 +1,68 @@
+# Memuat dataset
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Memuat dataset
-day = pd.read_csv('datasetBike-sharing-dataset/day.csv')
+day = pd.read_csv('datasetBike-sharing-dataset\day.csv')
 
 # Menambahkan kolom total jumlah sewa
 day['total'] = day['casual'] + day['registered']
 
+# Mengubah format tanggal dan menambahkan kolom tahun
+day['dteday'] = pd.to_datetime(day['dteday'])
+day['yr'] = day['dteday'].dt.year
+
+# Menambah kolom musim
+day['season'] = day['season'].map({1: 'Spring', 2: 'Summer', 3: 'Fall', 4: 'Winter'})
+
 # Sidebar untuk memilih jenis visualisasi
 st.sidebar.title('Bike Sharing Dashboard')
-visualization = st.sidebar.selectbox('Pilih Visualisasi:', ['Total Sewa Berdasarkan Musim', 'Pengaruh Suhu', 'Pengaruh Kecepatan Angin', 'Distribusi Sewa Berdasarkan Jenis Pengguna di Setiap Musim'])
+visualization = st.sidebar.selectbox('Pilih Visualisasi:', [
+    'Tren Pengaruh Faktor Cuaca pada Setiap Musim', 
+    'Total Sewa Berdasarkan Musim', 
+    'Distribusi Sewa Berdasarkan Jenis Pengguna di Setiap Musim', 
+    'Perbedaan Pola Penggunaan Sepeda Berbagi'
+])
 
-# Pengaruh Suhu terhadap Jumlah Sewa
-if visualization == 'Pengaruh Suhu':
-    st.header('Pengaruh Suhu terhadap Jumlah Sewa')
-    
-    # Korelasi antara suhu dan total sewa
-    correlation_temp_total = day[['temp', 'total']].corr().iloc[0, 1]
-    st.write(f'Korelasi antara suhu dan total sewa: {correlation_temp_total:.2f}')
-    
-    # Visualisasi
-    plt.figure(figsize=(10, 6))
-    sns.scatterplot(x='temp', y='total', data=day)
-    plt.title('Pengaruh Suhu terhadap Jumlah Sewa')
-    plt.xlabel('Suhu')
-    plt.ylabel('Jumlah Sewa')
-    st.pyplot(plt)
+# Membuat layout aplikasi Streamlit
+st.title('Bike Sharing Analysis')
+st.subheader('By Romario Onsu')
 
-# Pengaruh Kecepatan Angin terhadap Jumlah Sewa
-elif visualization == 'Pengaruh Kecepatan Angin':
-    st.header('Pengaruh Kecepatan Angin terhadap Jumlah Sewa')
-    
-    # Visualisasi
-    plt.figure(figsize=(10, 6))
-    sns.scatterplot(x='windspeed', y='total', data=day)
-    plt.title('Pengaruh Kecepatan Angin terhadap Jumlah Sewa')
-    plt.xlabel('Kecepatan Angin')
-    plt.ylabel('Jumlah Sewa')
-    st.pyplot(plt)
+# Suhu
+if visualization == 'Tren Pengaruh Faktor Cuaca pada Setiap Musim':
+    st.write("""
+        ## Tren Pengaruh Faktor Cuaca pada Setiap Musim (2011 dan 2012)
+        Grafik di bawah ini menunjukkan bagaimana suhu, kelembaban, dan kecepatan angin mempengaruhi jumlah penyewaan sepeda selama musim yang berbeda pada tahun 2011 dan 2012.
+    """)
+
+    # Suhu
+    st.subheader('Pengaruh Suhu')
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.lineplot(x='dteday', y='temp', hue='season', data=day, marker='o', ax=ax)
+    ax.set_title('Tren Pengaruh Suhu pada Setiap Musim (2011 dan 2012)')
+    ax.set_xlabel('Tanggal')
+    ax.set_ylabel('Suhu')
+    st.pyplot(fig)
+
+    # Kelembaban
+    st.subheader('Pengaruh Kelembaban')
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.lineplot(x='dteday', y='hum', hue='season', data=day, marker='o', ax=ax)
+    ax.set_title('Tren Pengaruh Kelembaban pada Setiap Musim (2011 dan 2012)')
+    ax.set_xlabel('Tanggal')
+    ax.set_ylabel('Kelembaban')
+    st.pyplot(fig)
+
+    # Kecepatan Angin
+    st.subheader('Pengaruh Kecepatan Angin')
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.lineplot(x='dteday', y='windspeed', hue='season', data=day, marker='o', ax=ax)
+    ax.set_title('Tren Pengaruh Kecepatan Angin pada Setiap Musim (2011 dan 2012)')
+    ax.set_xlabel('Tanggal')
+    ax.set_ylabel('Kecepatan Angin')
+    st.pyplot(fig)
 
 # Total Sewa Berdasarkan Musim
 elif visualization == 'Total Sewa Berdasarkan Musim':
@@ -50,12 +73,12 @@ elif visualization == 'Total Sewa Berdasarkan Musim':
     st.write(season_stats)
     
     # Visualisasi
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x='season', y='total', data=season_stats)
-    plt.title('Jumlah Sewa Berdasarkan Musim')
-    plt.xlabel('Musim')
-    plt.ylabel('Jumlah Sewa')
-    st.pyplot(plt)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.barplot(x='season', y='total', data=season_stats, ax=ax)
+    ax.set_title('Jumlah Sewa Berdasarkan Musim')
+    ax.set_xlabel('Musim')
+    ax.set_ylabel('Jumlah Sewa')
+    st.pyplot(fig)
 
 # Distribusi Sewa Berdasarkan Jenis Pengguna di Setiap Musim
 elif visualization == 'Distribusi Sewa Berdasarkan Jenis Pengguna di Setiap Musim':
@@ -66,10 +89,35 @@ elif visualization == 'Distribusi Sewa Berdasarkan Jenis Pengguna di Setiap Musi
     st.write(season_user_stats)
     
     # Visualisasi
-    plt.figure(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
     season_user_stats_melted = season_user_stats.melt(id_vars=['season'], value_vars=['casual', 'registered'], var_name='user_type', value_name='count')
-    sns.barplot(x='season', y='count', hue='user_type', data=season_user_stats_melted)
-    plt.title('Distribusi Sewa Berdasarkan Jenis Pengguna di Setiap Musim')
-    plt.xlabel('Musim')
-    plt.ylabel('Jumlah Sewa')
-    st.pyplot(plt)
+    sns.barplot(x='season', y='count', hue='user_type', data=season_user_stats_melted, ax=ax)
+    ax.set_title('Distribusi Sewa Berdasarkan Jenis Pengguna di Setiap Musim')
+    ax.set_xlabel('Musim')
+    ax.set_ylabel('Jumlah Sewa')
+    st.pyplot(fig)
+
+# Perbedaan Pola Penggunaan Sepeda Berbagi
+elif visualization == 'Perbedaan Pola Penggunaan Sepeda Berbagi':
+    st.header('Perbedaan Pola Penggunaan Sepeda Berbagi antara Hari Kerja dan Hari Libur selama Musim Panas dan Musim Dingin (2011-2012)')
+    
+    # Filter data untuk tahun 2011 dan 2012, dan hanya musim panas dan musim dingin
+    filtered_day = day[((day['yr'] == 2011) | (day['yr'] == 2012)) & ((day['season'] == 'Summer') | (day['season'] == 'Winter'))]
+
+    # Distribusi sewa berdasarkan hari kerja/hari libur di musim panas dan musim dingin
+    season_workingday_stats = filtered_day.groupby(['season', 'workingday'])[['casual', 'registered']].sum().reset_index()
+    season_workingday_stats['total'] = season_workingday_stats['casual'] + season_workingday_stats['registered']
+    season_workingday_stats['day_type'] = season_workingday_stats['workingday'].map({1: 'Hari Kerja', 0: 'Hari Libur'})
+    
+    # Memeriksa data setelah filter
+    st.write("Distribusi sewa berdasarkan hari kerja/hari libur di musim panas dan musim dingin (2011-2012):")
+    st.write(season_workingday_stats)
+    
+    # Visualisasi
+    fig, ax = plt.subplots(figsize=(12, 6))
+    sns.barplot(x='season', y='total', hue='day_type', data=season_workingday_stats, palette='muted', ax=ax)
+    ax.set_title('Perbedaan Pola Penggunaan Sepeda Berbagi antara Hari Kerja dan Hari Libur selama Musim Panas dan Musim Dingin (2011-2012)')
+    ax.set_xlabel('Musim')
+    ax.set_ylabel('Jumlah Sewa')
+    ax.legend(title='Tipe Hari')
+    st.pyplot(fig)
