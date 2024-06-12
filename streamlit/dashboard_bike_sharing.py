@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Memuat dataset
-day = pd.read_csv('datasetBike-sharing-dataset/day.csv')
+day_url = "https://raw.githubusercontent.com/romarioonsu/Analisis-Data-Bike-Sharing/main/datasetBike-sharing-dataset/day.csv"
+day = pd.read_csv(day_url)
 
 # Menambahkan kolom total jumlah sewa
 day['total'] = day['casual'] + day['registered']
